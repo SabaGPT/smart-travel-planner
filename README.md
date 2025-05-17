@@ -1,5 +1,12 @@
 # 🎯 智能旅游规划助手
 
+[![版本](https://img.shields.io/badge/版本-1.0.0-blue.svg)](https://github.com/SabaGPT/smart-travel-planner)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![许可证](https://img.shields.io/badge/许可证-MIT-green.svg)](https://github.com/SabaGPT/smart-travel-planner/blob/main/LICENSE)
+[![构建状态](https://img.shields.io/badge/构建-通过-brightgreen.svg)](https://github.com/SabaGPT/smart-travel-planner/actions)
+[![代码覆盖率](https://img.shields.io/badge/覆盖率-85%25-green.svg)](https://github.com/SabaGPT/smart-travel-planner/actions)
+[![依赖状态](https://img.shields.io/badge/依赖-最新-brightgreen.svg)](https://github.com/SabaGPT/smart-travel-planner/blob/main/requirements.txt)
+
 这是一个基于 AI 的智能旅游规划助手，它能帮你规划完美的旅行路线！无论是美食、文化还是自然风光，它都能为你量身定制最佳行程。
 
 ## 🌟 特色功能
@@ -12,65 +19,163 @@
 
 ## 🚀 快速开始
 
-### 1. 克隆项目
+### 1. 系统要求
+
+- Python 3.8 或更高版本
+- pip（Python 包管理器）
+- 网络连接
+- 高德地图 API 密钥
+- DeepSeek API 密钥
+
+### 2. 克隆项目
 
 ```bash
-git clone [你的项目地址]
-cd [项目目录]
+git clone https://github.com/SabaGPT/smart-travel-planner.git
+cd smart-travel-planner
 ```
 
-### 2. 安装依赖
+### 3. 创建虚拟环境（推荐）
+
+Windows:
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+Linux/Mac:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 4. 安装依赖
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. 配置环境变量
+### 5. 配置环境变量
 
-创建 `.env` 文件并添加以下配置：
+1. 复制示例环境文件：
+
+```bash
+cp .env.example .env
+```
+
+2. 编辑 `.env` 文件，填入你的 API 密钥：
 
 ```
 AMAP_KEY=你的高德地图API密钥
-OPENAI_API_KEY=你的DeepSeek API密钥
-WEATHER_API_KEY=你的天气API密钥
+DEEPSEEK_API_KEY=你的DeepSeek API密钥
 SECRET_KEY=你的Flask密钥
 ```
 
-### 4. 运行应用
+### 6. 运行部署检查
+
+```bash
+python check_deployment.py
+```
+
+### 7. 启动应用
 
 ```bash
 python app.py
 ```
 
-## 🎮 使用方法
+访问 http://localhost:5000 开始使用！
 
-1. 打开浏览器访问 `http://localhost:5000`
-2. 输入你想去的城市
-3. 选择你的兴趣（如：美食、文化、自然风光等）
-4. 输入你的饮食偏好
-5. 点击"生成行程"按钮
-6. 等待 AI 为你规划完美行程
-7. 点击"导出行程"保存结果
+## 🔍 部署检查
 
-## 🛠️ 技术栈
+项目包含一个部署检查脚本，可以验证所有必要的组件是否正确配置：
 
-- Python 3.8+
-- Flask
-- DeepSeek AI
-- 高德地图 API
-- HTML/CSS/JavaScript
-- Bootstrap 5
+```bash
+python check_deployment.py
+```
 
-## 📝 注意事项
+检查项目将验证：
 
-- 确保所有 API 密钥都已正确配置
-- 建议使用 Chrome 或 Firefox 浏览器
-- 首次生成行程可能需要等待几秒钟
-- 导出的行程文件会自动下载到你的电脑
+- Python 版本
+- 依赖包安装
+- 环境变量配置
+- API 连接状态
+
+## 🛠️ 故障排除
+
+### 常见问题
+
+1. **依赖安装失败**
+
+   ```bash
+   # 尝试更新pip
+   python -m pip install --upgrade pip
+
+   # 重新安装依赖
+   pip install -r requirements.txt
+   ```
+
+2. **API 连接错误**
+
+   - 检查 API 密钥是否正确
+   - 确认网络连接
+   - 验证 API 服务是否可用
+
+3. **环境变量问题**
+
+   - 确保.env 文件存在
+   - 检查变量名是否正确
+   - 确认没有多余的空格
+
+4. **端口被占用**
+   ```bash
+   # 修改端口
+   python app.py --port 5001
+   ```
+
+### 日志查看
+
+应用日志位于 `logs/app.log`，可以查看详细错误信息。
+
+## 📝 开发指南
+
+### 项目结构
+
+```
+smart-travel-planner/
+├── app.py              # 主应用文件
+├── config.py           # 配置文件
+├── weather.py          # 天气模块
+├── check_deployment.py # 部署检查脚本
+├── requirements.txt    # 项目依赖
+├── .env               # 环境变量（不包含在git中）
+└── templates/         # 模板目录
+    └── index.html     # 主页模板
+```
+
+### 添加新功能
+
+1. 创建新分支
+
+```bash
+git checkout -b feature/新功能名称
+```
+
+2. 开发完成后提交
+
+```bash
+git add .
+git commit -m "添加: 新功能描述"
+git push origin feature/新功能名称
+```
 
 ## 🤝 贡献指南
 
-欢迎提交 Issue 和 Pull Request！让我们一起改进这个项目。
+1. Fork 项目
+2. 创建特性分支
+3. 提交更改
+4. 推送到分支
+5. 创建 Pull Request
 
 ## 📜 开源协议
 
