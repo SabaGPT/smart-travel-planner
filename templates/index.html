@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>完美一日游规划</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        padding: 20px;
+        font-family: "Courier New", monospace;
+      }
+      .container {
+        max-width: 800px;
+        background-color: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .result-section {
+        margin-top: 20px;
+        padding: 20px;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        display: none;
+      }
+      .route-step {
+        margin: 10px 0;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+      }
+      .error-message {
+        color: #dc3545;
+        padding: 10px;
+        margin: 10px 0;
+        background-color: #f8d7da;
+        border-radius: 5px;
+      }
+      /* ASCII艺术样式 */
+      .ascii-art {
+        font-family: monospace;
+        white-space: pre;
+        text-align: center;
+        color: #6c757d;
+        margin: 20px 0;
+        font-size: 10px;
+        line-height: 1.2;
+        overflow-x: hidden;
+        max-width: 100%;
+      }
+      /* 闪烁动画 */
+      @keyframes blink {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      .blink {
+        animation: blink 2s infinite;
+      }
+      /* 彩虹文字效果 */
+      .rainbow-text {
+        background: linear-gradient(
+          to right,
+          #ff0000,
+          #ff7f00,
+          #ffff00,
+          #00ff00,
+          #0000ff,
+          #4b0082,
+          #8b00ff
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: rainbow 5s linear infinite;
+      }
+      @keyframes rainbow {
+        0% {
+          background-position: 0% 50%;
+        }
+        100% {
+          background-position: 100% 50%;
+        }
+      }
+      /* 按钮悬停效果 */
+      .btn {
+        transition: all 0.3s ease;
+      }
+      .btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      }
+      /* 加载动画 */
+      .loading-text {
+        font-family: monospace;
+        margin-top: 10px;
+      }
+      .loading-dots::after {
+        content: "...";
+        animation: dots 1.5s infinite;
+      }
+      @keyframes dots {
+        0%,
+        20% {
+          content: ".";
+        }
+        40% {
+          content: "..";
+        }
+        60%,
+        100% {
+          content: "...";
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="ascii-art">
+        ╔════════════════════════════════════════════════════════════╗ ║ ║ ║
+        ██████╗ ███████╗██╗ ██╗██████╗ ███████╗██████╗ ║ ║ ██╔═══██╗██╔════╝██║
+        ██║██╔══██╗██╔════╝██╔══██╗ ║ ║ ██║ ██║█████╗ ██║ ██║██║ ██║█████╗
+        ██████╔╝ ║ ║ ██║ ██║██╔══╝ ██║ ██║██║ ██║██╔══╝ ██╔══██╗ ║ ║
+        ╚██████╔╝██║ ╚██████╔╝██████╔╝███████╗██║ ██║ ║ ║ ╚═════╝ ╚═╝ ╚═════╝
+        ╚═════╝ ╚══════╝╚═╝ ╚═╝ ║ ║ ║
+        ╚════════════════════════════════════════════════════════════╝
+      </div>
+
+      <h1 class="text-center mb-4 rainbow-text">完美一日游规划</h1>
+
+      <form id="tripForm">
+        <div class="mb-3">
+          <label for="location" class="form-label blink">📍 您的位置</label>
+          <input type="text" class="form-control" id="location" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="interests" class="form-label blink"
+            >🎯 您的兴趣（用逗号分隔）</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            id="interests"
+            placeholder="例如：历史、美食、购物"
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="dietary" class="form-label blink">🍽️ 饮食偏好</label>
+          <input
+            type="text"
+            class="form-control"
+            id="dietary"
+            placeholder="例如：素食、无辣、海鲜"
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 rainbow-text">
+          ✨ 生成行程 ✨
+        </button>
+      </form>
+
+      <div id="loading" class="text-center mt-4" style="display: none">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">加载中</span>
+        </div>
+        <div class="loading-text">
+          正在规划完美行程<span class="loading-dots"></span>
+        </div>
+      </div>
+
+      <div id="result" class="result-section">
+        <div class="ascii-art">
+          ╔════════════════════════════════════════════════════════════╗ ║ ║ ║
+          ✨ 行程生成成功 ✨ ║ ║ ║
+          ╚════════════════════════════════════════════════════════════╝
+        </div>
+        <h3 class="rainbow-text">您的个性化行程</h3>
+        <div id="weather"></div>
+        <div id="itinerary"></div>
+        <div id="route"></div>
+        <div class="mt-3 text-center">
+          <button
+            id="exportBtn"
+            class="btn btn-success rainbow-text"
+            style="display: none"
+          >
+            💾 导出行程 💾
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function formatRouteData(routeData) {
+        if (routeData.error) {
+          return `<div class="error-message">${routeData.error}</div>`;
+        }
+
+        if (
+          !routeData.route ||
+          !routeData.route.paths ||
+          !routeData.route.paths[0]
+        ) {
+          return '<div class="error-message">无法获取路线信息</div>';
+        }
+
+        const path = routeData.route.paths[0];
+        let html = "<h4>路线规划</h4>";
+
+        // 显示地点列表
+        if (routeData.locations) {
+          html += '<div class="mb-3"><strong>行程地点：</strong><br>';
+          routeData.locations.forEach((location, index) => {
+            html += `${index + 1}. ${location}<br>`;
+          });
+          html += "</div>";
+        }
+
+        // 显示路线步骤
+        if (path.steps) {
+          html += '<div class="route-steps">';
+          path.steps.forEach((step, index) => {
+            html += `
+              <div class="route-step">
+                <strong>步骤 ${index + 1}:</strong><br>
+                从 ${step.start_location} 到 ${step.end_location}<br>
+                距离: ${(step.distance / 1000).toFixed(1)} 公里<br>
+                预计时间: ${Math.ceil(step.duration / 60)} 分钟
+              </div>
+            `;
+          });
+          html += "</div>";
+        }
+
+        // 显示总距离和时间
+        html += `
+          <div class="mt-3">
+            <strong>总距离：</strong>${(path.distance / 1000).toFixed(
+              1
+            )} 公里<br>
+            <strong>预计总时间：</strong>${Math.ceil(path.duration / 60)} 分钟
+          </div>
+        `;
+
+        return html;
+      }
+
+      function exportTrip() {
+        // 获取天气信息并处理格式
+        const weatherElement = document.getElementById("weather");
+        const weatherText = weatherElement.innerText
+          .replace(/\[|\]|"/g, "") // 移除方括号和引号
+          .replace(/\\n/g, "\n") // 将\n转换为实际换行
+          .trim(); // 移除首尾空白
+
+        // 获取行程安排并处理格式
+        const itineraryElement = document.getElementById("itinerary");
+        const itineraryText = itineraryElement.innerText
+          .replace(/###/g, "") // 移除标题符号
+          .replace(/\*\*/g, "") // 移除加粗符号
+          .replace(/\*/g, "") // 移除星号
+          .replace(/【/g, "") // 移除中文方括号
+          .replace(/】/g, "") // 移除中文方括号
+          .replace(/\\n/g, "\n") // 将\n转换为实际换行
+          .trim(); // 移除首尾空白
+
+        // 获取路线规划并处理格式
+        const routeElement = document.getElementById("route");
+        const routeText = routeElement.innerText
+          .replace(/<[^>]*>/g, "") // 移除HTML标签
+          .replace(/\\n/g, "\n") // 将\n转换为实际换行
+          .trim(); // 移除首尾空白
+
+        // 组合内容
+        const content = `完美一日游行程规划
+
+${weatherText}
+
+${itineraryText}
+
+${routeText}`;
+
+        // 创建Blob对象
+        const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+
+        // 创建下载链接
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "我的行程.txt";
+
+        // 触发下载
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      document
+        .getElementById("tripForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const loading = document.getElementById("loading");
+          const result = document.getElementById("result");
+          const exportBtn = document.getElementById("exportBtn");
+
+          loading.style.display = "block";
+          result.style.display = "none";
+          exportBtn.style.display = "none";
+
+          const data = {
+            location: document.getElementById("location").value,
+            interests: document.getElementById("interests").value,
+            dietary_preferences: document.getElementById("dietary").value,
+          };
+
+          try {
+            const response = await fetch("/plan_trip", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            });
+
+            const resultData = await response.json();
+
+            // 显示天气信息
+            document.getElementById("weather").innerHTML = `
+              <h4>天气信息</h4>
+              <pre>${JSON.stringify(resultData.weather, null, 2)}</pre>
+            `;
+
+            // 显示行程安排
+            document.getElementById("itinerary").innerHTML = `
+              <h4>行程安排</h4>
+              <pre>${resultData.itinerary}</pre>
+            `;
+
+            // 显示路线规划
+            document.getElementById("route").innerHTML = formatRouteData(
+              resultData.route
+            );
+
+            result.style.display = "block";
+            exportBtn.style.display = "block";
+          } catch (error) {
+            alert("生成行程时出错，请稍后重试");
+            console.error("Error:", error);
+          } finally {
+            loading.style.display = "none";
+          }
+        });
+
+      // 添加导出按钮点击事件
+      document
+        .getElementById("exportBtn")
+        .addEventListener("click", exportTrip);
+    </script>
+  </body>
+</html>
